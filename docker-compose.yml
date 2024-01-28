@@ -1,0 +1,83 @@
+version: '3.9'
+
+services:
+
+  #App
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: routate/backend:latest
+    container_name: routate-backend
+    restart: unless-stopped
+    working_dir: /rayantec/routate-backend
+    tty: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - amitis
+
+  # Nginx
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    tty: true
+    volumes:
+      - ./:/var/www/config-microservice
+      - ./docker/nginx:/etc/nginx/conf.d/
+    networks:
+      - routate
+
+  # Mongodb
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: unless-stopped
+    tty: true
+    ports:
+      - ${DB_PORT:-27017}:27017
+    volumes:
+      - mongodb-data:/data/db
+      - ./docker/mongodb/entrypoint.sh:/docker-entrypoint-initdb.d/entrypoint.sh:ro
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_ROOT_USERNAME:-root}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootawesomepassword}
+      MONGO_INITDB_DATABASE: ${DB_DATABASE:-app}
+      MONGO_INITDB_USERNAME: ${DB_USERNAME:-app}
+      MONGO_INITDB_PASSWORD: ${DB_PASSWORD:-appawesomepassword}
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh mongodb:$DB_PORT --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - routate
+
+  # Redis
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      retries: 3
+      timeout: 5s
+    ports:
+      - ${REDIS_PORT:-6379}:6379
+    volumes:
+      - redis-data:/data
+    networks:
+      - routate
+
+volumes:
+  mongodb-data:
+  redis-data:
+
+networks:
+  routate:
+    driver: bridge
