@@ -1,0 +1,10 @@
+.git
+.idea
+/.idea
+.env
+.env.prodction
+.env.backup
+.env.production
+/.fleet
+/.vscode
+/vendor

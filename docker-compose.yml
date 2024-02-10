@@ -2,65 +2,66 @@ version: '3.9'
 
 services:
 
-  #App
+  # App
   app:
     build:
       context: .
-      dockerfile: Dockerfile
-    image: routate/backend:latest
-    container_name: routate-backend
+      args:
+        APP_NAME: ${APP_NAME}
+        APP_PORT: ${APP_PORT}
+      dockerfile: build/docker/app/Dockerfile
+    container_name: routate-app
     restart: unless-stopped
-    working_dir: /rayantec/routate-backend
     tty: true
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - mongodb
+      - redis
     networks:
-      - amitis
+      - routate-network
 
   # Nginx
   nginx:
     image: nginx:stable-alpine
-    container_name: nginx
+    container_name: routate-nginx
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
     tty: true
     volumes:
-      - ./:/var/www/config-microservice
-      - ./docker/nginx:/etc/nginx/conf.d/
+      - ./build/docker/nginx:/etc/nginx/conf.d/
     networks:
-      - routate
+      - routate-network
 
   # Mongodb
   mongodb:
     image: mongo:latest
-    container_name: mongodb
+    container_name: routate-mongodb
     restart: unless-stopped
     tty: true
     ports:
       - ${DB_PORT:-27017}:27017
     volumes:
       - mongodb-data:/data/db
-      - ./docker/mongodb/entrypoint.sh:/docker-entrypoint-initdb.d/entrypoint.sh:ro
+      - ./build/docker/mongodb:/docker-entrypoint-initdb.d/
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${DB_ROOT_USERNAME:-root}
       MONGO_INITDB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootawesomepassword}
-      MONGO_INITDB_DATABASE: ${DB_DATABASE:-app}
-      MONGO_INITDB_USERNAME: ${DB_USERNAME:-app}
-      MONGO_INITDB_PASSWORD: ${DB_PASSWORD:-appawesomepassword}
+      MONGO_DATABASE: ${DB_DATABASE:-app}
+      MONGO_USERNAME: ${DB_USERNAME:-app}
+      MONGO_PASSWORD: ${DB_PASSWORD:-appawesomepassword}
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh mongodb:$DB_PORT --quiet
       interval: 10s
       timeout: 5s
       retries: 3
     networks:
-      - routate
+      - routate-network
 
   # Redis
   redis:
     image: redis:alpine
-    container_name: redis
+    container_name: routate-redis
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
@@ -71,13 +72,26 @@ services:
       - ${REDIS_PORT:-6379}:6379
     volumes:
       - redis-data:/data
+      - ./build/docker/redis:/etc/redis/
     networks:
-      - routate
+      - routate-network
+
+  # RabbitMQ
+  rabbitmq:
+    image: rabbitmq:alpine
+    container_name: routate-rabbitmq
+    ports:
+      - ${RABBITMQ_PORT:-5672}:5672
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-app}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-app}
+    networks:
+      - routate-network
 
 volumes:
   mongodb-data:
   redis-data:
 
 networks:
-  routate:
+  routate-network:
     driver: bridge
