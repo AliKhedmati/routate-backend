@@ -78,3 +78,8 @@ func (MongoDB *MongoDB) Close() error {
 func (MongoDB *MongoDB) GetDatabase() *mongo.Database {
 	return db
 }
+
+// GetClient returns an instance of MongoDB client
+func (MongoDB *MongoDB) GetClient() *mongo.Client {
+	return client
+}

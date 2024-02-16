@@ -1,8 +1,8 @@
 package database
 
 import (
-	"github.com/AliKhedmati/routate-backend/config"
-	databaseDriver "github.com/AliKhedmati/routate-backend/src/database/drivers"
+	"github.com/AliKhedmati/routate-backend/src/config"
+	databaseDrivers "github.com/AliKhedmati/routate-backend/src/database/drivers"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -10,6 +10,7 @@ type Database interface {
 	Connect() error
 	Close() error
 	GetDatabase() *mongo.Database //Todo: should be more dynamic.
+	GetClient() *mongo.Client     //Todo: should be more dynamic.
 }
 
 var (
@@ -20,7 +21,7 @@ var (
 func Init() error {
 	var err error
 	configs = config.GetInstance()
-	db = &databaseDriver.MongoDB{
+	db = &databaseDrivers.MongoDB{
 		Username: configs.Get("DB_USERNAME"),
 		Password: configs.Get("DB_PASSWORD"),
 		Host:     configs.Get("DB_HOST"),
@@ -38,4 +39,8 @@ func Init() error {
 
 func GetDatabase() *mongo.Database {
 	return db.GetDatabase()
+}
+
+func GetClient() *mongo.Client {
+	return db.GetClient()
 }

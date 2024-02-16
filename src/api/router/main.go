@@ -1,6 +1,19 @@
 package router
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/AliKhedmati/routate-backend/src/api/http/controllers"
+	"github.com/AliKhedmati/routate-backend/src/database"
+	"github.com/AliKhedmati/routate-backend/src/repositories"
+	"github.com/AliKhedmati/routate-backend/src/services"
+	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/mongo"
+)
+
+var db *mongo.Database
+
+func init() {
+	db = database.GetDatabase()
+}
 
 func NewRouter() *gin.Engine {
 
@@ -13,15 +26,45 @@ func NewRouter() *gin.Engine {
 	{
 		v1 := api.Group("/v1")
 		{
-			users := v1.Group("/users")
-			{
-				users.GET("")
-			}
+			/*
+				Countries
+			*/
 
 			countries := v1.Group("/countries")
 			{
-				countries.GET("")
-				countries.POST("")
+				countries.GET("/list")
+			}
+
+			/*
+				Cities
+			*/
+
+			cities := v1.Group("/cities")
+			{
+				cities.GET("")
+			}
+
+			/*
+				Locations
+			*/
+
+			locations := v1.Group("/locations")
+			{
+				locations.GET("")
+			}
+
+			/*
+				Users
+			*/
+
+			userRepo := repositories.NewUserRepository(db.Collection("users"))
+			userService := services.NewUserService(userRepo)
+			userController := controllers.NewUserController(userService)
+
+			users := v1.Group("/users")
+			{
+				users.POST("", userController.CreateUser)
+				users.GET(":id", userController.FindUserByID)
 			}
 		}
 	}

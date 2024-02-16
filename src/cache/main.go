@@ -1,8 +1,8 @@
 package cache
 
 import (
-	"github.com/AliKhedmati/routate-backend/config"
-	cacheDriver "github.com/AliKhedmati/routate-backend/src/cache/drivers"
+	cacheDrivers "github.com/AliKhedmati/routate-backend/src/cache/drivers"
+	"github.com/AliKhedmati/routate-backend/src/config"
 	"github.com/go-redis/redis/v8"
 )
 
@@ -20,7 +20,7 @@ var (
 func Init() error {
 	var err error
 	configs = config.GetInstance()
-	cache = &cacheDriver.Redis{
+	cache = &cacheDrivers.Redis{
 		Host:     configs.Get("REDIS_HOST"),
 		Port:     configs.Get("REDIS_PORT"),
 		Password: configs.Get("REDIS_PASSWORD"),

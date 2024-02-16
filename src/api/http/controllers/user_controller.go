@@ -2,30 +2,31 @@ package controllers
 
 import (
 	"context"
-	"github.com/AliKhedmati/routate-backend/src/model"
-	"github.com/AliKhedmati/routate-backend/src/service"
+	"github.com/AliKhedmati/routate-backend/src/models"
+	"github.com/AliKhedmati/routate-backend/src/services"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 type UserController struct {
-	userService *service.UserService
+	userService *services.UserService
 }
 
-// NewUserController initializes a new instance of UserController.
-func NewUserController(userService *service.UserService) *UserController {
-	return &UserController{userService}
+func NewUserController(userService *services.UserService) *UserController {
+	return &UserController{
+		userService: userService,
+	}
 }
 
 // CreateUser handles the creation of a new user.
 func (c *UserController) CreateUser(ctx *gin.Context) {
-	var user model.User
+	var user models.User
 	if err := ctx.ShouldBindJSON(&user); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Create the user using the user service
+	// Create the user using the user services
 	if err := c.userService.Create(context.Background(), &user); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
