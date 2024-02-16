@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"context"
+	"github.com/AliKhedmati/routate-backend/src/api/http/responses"
 	"github.com/AliKhedmati/routate-backend/src/models"
 	"github.com/AliKhedmati/routate-backend/src/services"
 	"github.com/gin-gonic/gin"
@@ -27,7 +27,7 @@ func (c *UserController) CreateUser(ctx *gin.Context) {
 	}
 
 	// Create the user using the user services
-	if err := c.userService.Create(context.Background(), &user); err != nil {
+	if err := c.userService.Create(ctx, &user); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
@@ -38,10 +38,15 @@ func (c *UserController) CreateUser(ctx *gin.Context) {
 // FindUserByID finds a user by ID.
 func (c *UserController) FindUserByID(ctx *gin.Context) {
 	id := ctx.Param("id")
-	user, err := c.userService.FindByID(context.Background(), id)
+	user, err := c.userService.FindByID(ctx, id)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"user": user})
+	ctx.JSON(http.StatusOK, responses.ApiResponse{
+		Message: "OK!",
+		Data: map[string]interface{}{
+			"user": &user,
+		},
+	})
 }

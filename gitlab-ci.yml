@@ -1,0 +1,46 @@
+# Specify the image to use for the job
+image: docker:stable
+
+# Define stages for the pipeline
+stages:
+  - build
+  - test
+  - release
+
+# Define variables
+variables:
+  # Set the environment variable for Go module support
+  GO111MODULE: "on"
+  # Set the environment variable for Go path
+  GOPATH: "/go"
+  # Set the environment variable for where dependencies are installed
+  PATH: "$GOPATH/bin:$PATH"
+
+# Jobs definition
+
+# Load environment variables from .env file
+before_script:
+  - source .env
+
+# Build stage
+build:
+  stage: build
+  script:
+    - docker build -t $APP_NAME -f build/docker/app/Dockerfile .
+    - docker tag $APP_NAME $APP_NAME:$CI_COMMIT_SHORT_SHA
+    - docker tag $APP_NAME $APP_NAME:latest
+    - docker push my-registry.example/$APP_NAME
+
+# Test stage
+test:
+  stage: test
+  script:
+    - docker run --rm $APP_NAME go test -race ./...
+
+# Release stage
+release:
+  stage: release
+  script:
+    - echo "Deploying..."
+  only:
+    - main

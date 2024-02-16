@@ -19,6 +19,13 @@ var (
 )
 
 func Init() error {
+	if err := Connect(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func Connect() error {
 	var err error
 	configs = config.GetInstance()
 	db = &databaseDrivers.MongoDB{
@@ -35,6 +42,13 @@ func Init() error {
 	}
 
 	return err
+}
+
+func Close() error {
+	if err := db.Close(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func GetDatabase() *mongo.Database {

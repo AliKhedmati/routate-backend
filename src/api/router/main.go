@@ -6,21 +6,15 @@ import (
 	"github.com/AliKhedmati/routate-backend/src/repositories"
 	"github.com/AliKhedmati/routate-backend/src/services"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var db *mongo.Database
-
-func init() {
-	db = database.GetDatabase()
-}
-
 func NewRouter() *gin.Engine {
-
 	// Initialize new router and attach logger and recovery middlewares.
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+
+	db := database.GetDatabase()
 
 	api := router.Group("/api")
 	{
@@ -56,7 +50,6 @@ func NewRouter() *gin.Engine {
 			/*
 				Users
 			*/
-
 			userRepo := repositories.NewUserRepository(db.Collection("users"))
 			userService := services.NewUserService(userRepo)
 			userController := controllers.NewUserController(userService)

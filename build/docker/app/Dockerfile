@@ -12,9 +12,9 @@ RUN go mod download
 RUN go build -o ${APP_NAME} ./src/cmd/main.go
 
 # Start a new stage from scratch
-FROM golang:alpine
+FROM alpine:latest
+COPY --from=builder /routate/${APP_NAME} /routate/${APP_NAME}
 WORKDIR /routate/${APP_NAME}
-COPY --from=builder /routate/${APP_NAME} .
 CMD ./${APP_NAME}
 # Expose
 EXPOSE ${APP_PORT}

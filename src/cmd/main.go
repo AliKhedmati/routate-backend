@@ -11,5 +11,6 @@ func main() {
 	config.Init()
 	cache.Init()
 	database.Init()
+	defer database.Close()
 	api.Init()
 }

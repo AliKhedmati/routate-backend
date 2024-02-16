@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/AliKhedmati/routate-backend/src/models"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -19,7 +20,8 @@ func NewUserRepository(collection *mongo.Collection) *UserRepository {
 
 func (repository *UserRepository) FindByID(ctx context.Context, id string) (*models.User, error) {
 	var user models.User
-	err := repository.collection.FindOne(ctx, bson.M{"_id": id}).Decode(&user)
+	idObj, _ := primitive.ObjectIDFromHex(id)
+	err := repository.collection.FindOne(ctx, bson.M{"_id": idObj}).Decode(&user)
 	if err != nil {
 		return nil, err
 	}
