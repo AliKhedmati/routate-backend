@@ -1,50 +1,39 @@
 package cache
 
 import (
-	"context"
-	"fmt"
+	"github.com/AliKhedmati/routate-backend/config"
+	cacheDriver "github.com/AliKhedmati/routate-backend/src/cache/drivers"
 	"github.com/go-redis/redis/v8"
-	"time"
 )
 
-// Redis represents a Redis database connection
-type Redis struct {
-	client *redis.Client
+type Cache interface {
+	Connect() error
+	Close() error
+	GetCache() *redis.Client
 }
 
-// Connect establishes a connection to Redis
-func (db *Redis) Connect() error {
-	// Create Redis client
-	client := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
-	})
+var (
+	configs *config.Config
+	cache   Cache
+)
 
-	// Ping Redis server to ensure connection
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+func Init() error {
+	var err error
+	configs = config.GetInstance()
+	cache = &cacheDriver.Redis{
+		Host:     configs.Get("REDIS_HOST"),
+		Port:     configs.Get("REDIS_PORT"),
+		Password: configs.Get("REDIS_PASSWORD"),
+	}
 
-	_, err := client.Ping(ctx).Result()
-	if err != nil {
+	// Connect to the database
+	if err = cache.Connect(); err != nil {
 		return err
 	}
 
-	fmt.Println("Connected to Redis!")
-
-	db.client = client
-
-	return nil
+	return err
 }
 
-// Close closes the connection to Redis
-func (db *Redis) Close() error {
-	err := db.client.Close()
-	if err != nil {
-		return err
-	}
-
-	fmt.Println("Disconnected from Redis!")
-
-	return nil
+func GetCache() *redis.Client {
+	return cache.GetCache()
 }

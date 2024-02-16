@@ -10,6 +10,7 @@ import (
 type UserRepository interface {
 	FindByID(ctx context.Context, id string) (*model.User, error)
 	Create(ctx context.Context, user *model.User) error
+	CreateMany(ctx context.Context, users []*model.User) error
 	Update(user *model.User) error
 }
 
