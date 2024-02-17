@@ -11,18 +11,19 @@ type UserService struct {
 	userRepository *repositories.UserRepository
 }
 
+// NewUserService Returns an instance of UserService
 func NewUserService(UserRepository *repositories.UserRepository) *UserService {
 	return &UserService{
 		userRepository: UserRepository,
 	}
 }
 
-// Create creates a new user.
+// Create Creates a new user.
 func (service *UserService) Create(ctx context.Context, user *models.User) error {
 	return service.userRepository.Create(ctx, user)
 }
 
-// FindByID finds a user by their ID.
+// FindByID Finds a user by their ID.
 func (service *UserService) FindByID(ctx context.Context, id string) (*models.User, error) {
 	return service.userRepository.FindByID(ctx, id)
 }

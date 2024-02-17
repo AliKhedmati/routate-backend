@@ -56,8 +56,8 @@ func NewRouter() *gin.Engine {
 
 			users := v1.Group("/users")
 			{
-				users.POST("", userController.CreateUser)
-				users.GET(":id", userController.FindUserByID)
+				users.POST("", userController.Create)
+				users.GET(":id", userController.FindByID)
 			}
 		}
 	}

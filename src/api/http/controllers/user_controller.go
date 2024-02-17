@@ -8,18 +8,20 @@ import (
 	"net/http"
 )
 
+// UserController represents a controller for user-related operations.
 type UserController struct {
 	userService *services.UserService
 }
 
+// NewUserController returns an instance of UserController.
 func NewUserController(userService *services.UserService) *UserController {
 	return &UserController{
 		userService: userService,
 	}
 }
 
-// CreateUser handles the creation of a new user.
-func (c *UserController) CreateUser(ctx *gin.Context) {
+// Create handles the creation of a new user.
+func (c *UserController) Create(ctx *gin.Context) {
 	var user models.User
 	if err := ctx.ShouldBindJSON(&user); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -32,17 +34,19 @@ func (c *UserController) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "User created successfully", "user": user})
+	ctx.JSON(http.StatusCreated, gin.H{"message": "User created successfully", "user": &user})
 }
 
-// FindUserByID finds a user by ID.
-func (c *UserController) FindUserByID(ctx *gin.Context) {
+// FindByID finds a user by ID.
+func (c *UserController) FindByID(ctx *gin.Context) {
 	id := ctx.Param("id")
+
 	user, err := c.userService.FindByID(ctx, id)
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
+
 	ctx.JSON(http.StatusOK, responses.ApiResponse{
 		Message: "OK!",
 		Data: map[string]interface{}{
