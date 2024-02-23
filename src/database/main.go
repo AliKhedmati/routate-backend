@@ -9,8 +9,8 @@ import (
 type Database interface {
 	Connect() error
 	Close() error
-	GetDatabase() *mongo.Database //Todo: should be more dynamic.
-	GetClient() *mongo.Client     //Todo: should be more dynamic.
+	GetDatabase() *mongo.Database
+	GetClient() *mongo.Client
 }
 
 var (

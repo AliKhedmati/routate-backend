@@ -7,7 +7,6 @@ services:
     build:
       context: .
       args:
-        APP_NAME: ${APP_NAME}
         APP_PORT: ${APP_PORT}
       dockerfile: build/docker/app/Dockerfile
     container_name: routate-app
@@ -29,7 +28,10 @@ services:
       - "443:443"
     tty: true
     volumes:
-      - ./build/docker/nginx:/etc/nginx/conf.d/
+      - type: bind
+        source: ./build/docker/nginx/app.conf
+        target: /etc/nginx/conf.d/default.conf
+        read_only: true
     networks:
       - routate-network
 
